@@ -22,8 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		082CA5D01B8BAB510054B53C /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 082CA5CF1B8BAB510054B53C /* cpu.c */; };
 		082CA5D21B8BAB6D0054B53C /* lcdimg.c in Sources */ = {isa = PBXBuildFile; fileRef = 082CA5D11B8BAB6D0054B53C /* lcdimg.c */; };
+		082CA5E01B8BDDCA0054B53C /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 082CA5CF1B8BAB510054B53C /* cpu.c */; };
 		98150A8416D412E90085EBA2 /* OpenEmuBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98150A8316D412E90085EBA2 /* OpenEmuBase.framework */; };
 		986F323716D3FF4F00BB38E2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 986F323616D3FF4F00BB38E2 /* Cocoa.framework */; };
 		986F324116D3FF4F00BB38E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 986F323F16D3FF4F00BB38E2 /* InfoPlist.strings */; };
@@ -42,13 +42,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		082CA5CF1B8BAB510054B53C /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
-		082CA5D11B8BAB6D0054B53C /* lcdimg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lcdimg.c; sourceTree = "<group>"; };
-		082CA5D31B8BAB770054B53C /* prototypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prototypes.h; sourceTree = "<group>"; };
-		082CA5D41B8BB6D10054B53C /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../Downloads/vms/main.c; sourceTree = "<group>"; };
-		082CA5D61B8BBBA90054B53C /* mainwin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mainwin.c; path = ../../../Downloads/vms/mainwin.c; sourceTree = "<group>"; };
-		082CA5D81B8BC1340054B53C /* dc_mainwin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dc_mainwin.c; path = ../../../Downloads/vms/dc_mainwin.c; sourceTree = "<group>"; };
-		082CA5DA1B8BC3490054B53C /* dos_mainwin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dos_mainwin.c; path = ../../../Downloads/vms/dos_mainwin.c; sourceTree = "<group>"; };
+		082CA5CF1B8BAB510054B53C /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cpu.c; path = src/cpu.c; sourceTree = "<group>"; };
+		082CA5D11B8BAB6D0054B53C /* lcdimg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lcdimg.c; path = src/lcdimg.c; sourceTree = "<group>"; };
+		082CA5D31B8BAB770054B53C /* prototypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = prototypes.h; path = src/prototypes.h; sourceTree = "<group>"; };
 		084287181B8BA29700726E4D /* OEVMUSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OEVMUSystemResponderClient.h; path = ../../../Projects/repos/OpenEmu/OpenEmu/VMU/OEVMUSystemResponderClient.h; sourceTree = "<group>"; };
 		98150A8316D412E90085EBA2 /* OpenEmuBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenEmuBase.framework; path = "../../../../Library/Developer/Xcode/DerivedData/OpenEmu-bhfveylavlxwbkddelpdvazebykd/Build/Products/Debug/OpenEmuBase.framework"; sourceTree = "<group>"; };
 		986F323316D3FF4F00BB38E2 /* SoftVMS.oecoreplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SoftVMS.oecoreplugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,10 +116,6 @@
 			isa = PBXGroup;
 			children = (
 				084287181B8BA29700726E4D /* OEVMUSystemResponderClient.h */,
-				082CA5D81B8BC1340054B53C /* dc_mainwin.c */,
-				082CA5DA1B8BC3490054B53C /* dos_mainwin.c */,
-				082CA5D41B8BB6D10054B53C /* main.c */,
-				082CA5D61B8BBBA90054B53C /* mainwin.c */,
 				986F324F16D4014B00BB38E2 /* VMUGameCore.h */,
 				986F325016D4014B00BB38E2 /* VMUGameCore.m */,
 				986F327016D40A6300BB38E2 /* src */,
@@ -230,7 +222,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				082CA5D01B8BAB510054B53C /* cpu.c in Sources */,
+				082CA5E01B8BDDCA0054B53C /* cpu.c in Sources */,
 				082CA5D21B8BAB6D0054B53C /* lcdimg.c in Sources */,
 				986F325116D4014B00BB38E2 /* VMUGameCore.m in Sources */,
 			);

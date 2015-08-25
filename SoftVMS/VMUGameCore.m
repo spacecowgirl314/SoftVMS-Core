@@ -34,17 +34,18 @@
 
 @interface VMUGameCore () <OEVMUSystemResponderClient>
 {
+    uint16_t *videoBuffer;
     int videoWidth, videoHeight;
     NSString *romPath;
-    NSString *overlayFile;
-    BOOL overlayIsLoaded;
 }
 @end
 
-VMUGameCore *g_core;
+//#define FGCOLOR RGB(0x08,0x10,0x52)
+//#define BGCOLOR RGB(0xaa,0xd5,0xc3)
+
+VMUGameCore *current;
 
 @implementation VMUGameCore
-static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
 
 - (id)init
 {
@@ -52,12 +53,23 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
     {
         videoWidth = 48;
         videoHeight = 32;
+        
+        if(videoBuffer)
+            free(videoBuffer);
+        videoBuffer = (uint16_t*)malloc(videoWidth*videoHeight*3);
+        memset(videoBuffer, 0, videoWidth*videoHeight*3);
     }
-    overlayIsLoaded = NO;
-
-    g_core = self;
+    
+    current = self;
     return self;
 }
+
+- (void)dealloc
+{
+    free(videoBuffer);
+}
+
+#pragma mark - Execution
 
 - (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
 {
@@ -67,18 +79,7 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
 
 - (void)executeFrameSkippingFrame:(BOOL)skip
 {
-    // late init of the overlay
 
-    // check fix, has to be REloaded at each frame, i mean really ?
-//    if (![overlayFile isEqualToString:@""] && !overlayIsLoaded)
-//    //if (![overlayFile isEqualToString:@""] && !overlayIsLoaded)
-//    {
-//        load_overlay((char *)[overlayFile UTF8String]);
-//        overlayIsLoaded = YES;
-//    }
-
-//    vecx_emu ((VECTREX_MHZ / 1000) * EMU_TIMER, 0);
-//    glFlush();
 }
 
 - (void)executeFrame
@@ -91,69 +92,51 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
     if(!isRunning)
     {
         [super startEmulation];
-        do_vmsgame([romPath UTF8String], NULL);
+        [self.renderDelegate willRenderOnAlternateThread];
+        [NSThread detachNewThreadSelector:@selector(runVMUEmuThread) toTarget:self withObject:nil];
     }
 }
 
-- (void)updateSound:(uint8_t *)buff len:(int)len
+- (void)runVMUEmuThread
 {
-    [[g_core ringBufferAtIndex:0] write:buff maxLength:len];
+    @autoreleasepool
+    {
+        [self.renderDelegate startRenderingOnAlternateThread];
+        do_vmsgame((char*)[romPath UTF8String], NULL);
+        [super stopEmulation];
+    }
 }
 
 - (void)resetEmulation
 {
-//    vecx_reset();
+    
 }
+
+#pragma mark - Save State
 
 - (BOOL)saveStateToFileAtPath:(NSString *)fileName
 {
-//    FILE *saveFile = fopen([fileName UTF8String], "wb");
-//    
-//    VECXState *state = saveVecxState();
-//    
-//    long bytesWritten = fwrite(state, sizeof(char), sizeof(VECXState), saveFile);
-//    
-//    if(bytesWritten != sizeof(VECXState))
-//    {
-//        NSLog(@"Couldn't write state");
-//        return NO;
-//    }
-//    
-//    fclose(saveFile);
-//    
-//    free(state);
-//    
-//    return YES;
     return NO;
 }
 
 - (BOOL)loadStateFromFileAtPath:(NSString *)fileName
 {
-//    FILE *saveFile = fopen([fileName UTF8String], "rb");
-//    
-//    if(saveFile == NULL)
-//    {
-//        NSLog(@"Could not open state file");
-//        return NO;
-//    }
-//    
-//    VECXState *state = malloc(sizeof(VECXState));
-//    
-//    if(!fread(state, sizeof(char), sizeof(VECXState), saveFile))
-//    {
-//        NSLog(@"Couldn't read file");
-//        return NO;
-//    }
-//    
-//    fclose(saveFile);
-//    
-//    loadVecxState(state);
-//    
-//    free(state);
-//    
-//    return YES;
     return NO;
 }
+
+#pragma mark - Input
+
+- (oneway void)didPushVMUButton:(OEVMUButton)button forPlayer:(NSUInteger)player
+{
+    keypress(button);
+}
+
+- (oneway void)didReleaseVMUButton:(OEVMUButton)button forPlayer:(NSUInteger)player
+{
+    keyrelease(button);
+}
+
+#pragma mark - Video
 
 - (OEIntSize)aspectSize
 {
@@ -170,15 +153,9 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
     return OEIntSizeMake(videoWidth, videoHeight);
 }
 
-- (BOOL)rendersToOpenGL
-{
-    return YES;
-}
-
 - (const void *)videoBuffer
 {
-    NSLog(@"returning video buffer");
-    return mainimg.c;
+    return videoBuffer;
 }
 
 - (GLenum)pixelFormat
@@ -188,13 +165,15 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
 
 - (GLenum)pixelType
 {
-    return GL_UNSIGNED_INT_8_8_8_8;
+    return GL_UNSIGNED_SHORT_4_4_4_4_REV;
 }
 
 - (GLenum)internalPixelFormat
 {
-    return GL_RGB8;
+    return GL_RGB5;
 }
+
+#pragma mark - Audio
 
 - (double)audioSampleRate
 {
@@ -216,16 +195,7 @@ static union { unsigned char c[32*64/2]; unsigned long l[32*64/8]; } mainimg;
     return 1;
 }
 
-
-- (oneway void)didPushVMUButton:(OEVMUButton)button forPlayer:(NSUInteger)player
-{
-    keypress(button);
-}
-
-- (oneway void)didReleaseVMUButton:(OEVMUButton)button forPlayer:(NSUInteger)player
-{
-    keyrelease(button);
-}
+#pragma mark - Callbacks
 
 void error_msg(char *fmt, ...)
 {
@@ -238,17 +208,26 @@ void error_msg(char *fmt, ...)
 
 void vmputpixel(int x, int y, int p)
 {
-    NSLog(@"pixel: %i at (%i,%i)", p, x, y);
-    mainimg.c[x + y*32] = p;
-//    if(pixdbl) {
-//        x<<=1;
-//        y<<=1;
-//        XPutPixel(mainimg, x, y, p&1);
-//        XPutPixel(mainimg, x+1, y, p&1);
-//        XPutPixel(mainimg, x, y+1, p&1);
-//        XPutPixel(mainimg, x+1, y+1, p&1);
-//    } else
-//        XPutPixel(mainimg, x, y, p&1);
+    int bpp = 3;
+    uint16_t *pixels = (uint16_t *)current->videoBuffer + y * current->videoWidth + x * bpp;
+    
+//    pixels[0] = (p >> 16) & 0xff;
+//    pixels[1] = (p >> 8) & 0xff;
+//    pixels[2] = p & 0xff;
+//#define FGCOLOR RGB(0x08,0x10,0x52)
+//#define BGCOLOR RGB(0xaa,0xd5,0xc3)
+    if (p&1)
+    {
+        pixels[0] = 0x08;
+        pixels[1] = 0x10;
+        pixels[2] = 0x52;
+    }
+    else
+    {
+        pixels[0] = 0xaa;
+        pixels[1] = 0xd5;
+        pixels[2] = 0xc3;
+    }
 }
 
 void redrawlcd()
@@ -268,7 +247,26 @@ void waitforevents(struct timeval *t)
 
 void sound(int freq)
 {
-//    sound_freq = freq;
+    uint16_t *stream = (uint16_t*)malloc(60);
+    if(freq <= 0)
+        memset(stream, 0, 60);
+    else
+    {
+        int i;
+        static short v = 0x7fff;
+        static int f = 0;
+        for(i=0; i<60; i++)
+        {
+            f += freq;
+            while(f >= 32768)
+            {
+                v ^= 0xffff;
+                f -= 32768;
+            }
+            *stream++ = v;
+        }
+        [[current ringBufferAtIndex:0] write:stream maxLength:60];
+    }
 }
 
 @end

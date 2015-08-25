@@ -29,15 +29,5 @@
 #import "OEVMUSystemResponderClient.h"
 
 OE_EXPORTED_CLASS
-@interface VMUGameCore : OEGameCore {
-    @public
-    uint8_t padData[2][OEVMUButtonCount];
-    uint8_t xAxis[2][2];
-    uint8_t yAxis[2][2];
-}
-
-- (void)updateSound:(uint8_t *)buff len:(int)len;
-
+@interface VMUGameCore : OEGameCore
 @end
-
-extern VMUGameCore *g_core;
