@@ -247,7 +247,7 @@ void waitforevents(struct timeval *t)
 
 void sound(int freq)
 {
-    uint16_t *stream = (uint16_t*)malloc(60);
+    uint8_t *stream = (uint8_t*)malloc(60);
     if(freq <= 0)
         memset(stream, 0, 60);
     else
