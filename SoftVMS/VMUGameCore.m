@@ -34,14 +34,12 @@
 
 @interface VMUGameCore () <OEVMUSystemResponderClient>
 {
+    int bpp;
     uint16_t *videoBuffer;
     int videoWidth, videoHeight;
     NSString *romPath;
 }
 @end
-
-//#define FGCOLOR RGB(0x08,0x10,0x52)
-//#define BGCOLOR RGB(0xaa,0xd5,0xc3)
 
 VMUGameCore *current;
 
@@ -51,16 +49,23 @@ VMUGameCore *current;
 {
     if (self = [super init])
     {
-        videoWidth = 48;
-        videoHeight = 32;
+        videoWidth = 144;
+        videoHeight = 80;
+        bpp = 3;
         
         if(videoBuffer)
             free(videoBuffer);
-        videoBuffer = (uint16_t*)malloc(videoWidth*videoHeight*3);
-        memset(videoBuffer, 0, videoWidth*videoHeight*3);
+        videoBuffer = (uint16_t*)malloc(videoWidth*videoHeight*bpp);
+        memset(videoBuffer, 0, videoWidth*videoHeight*bpp);
     }
     
     current = self;
+    
+//    for(int i = 0; i<videoWidth*videoHeight*bpp; i++)
+//    {
+//        videoBuffer[i] = 50;
+//    }
+    
     return self;
 }
 
@@ -170,7 +175,7 @@ VMUGameCore *current;
 
 - (GLenum)internalPixelFormat
 {
-    return GL_RGB5;
+    return GL_RGB4;
 }
 
 #pragma mark - Audio
@@ -206,28 +211,33 @@ void error_msg(char *fmt, ...)
     va_end(va);
 }
 
-void vmputpixel(int x, int y, int p)
+void putpixel(int x, int y, int p)
 {
-    int bpp = 3;
-    uint16_t *pixels = (uint16_t *)current->videoBuffer + y * current->videoWidth + x * bpp;
-    
-//    pixels[0] = (p >> 16) & 0xff;
-//    pixels[1] = (p >> 8) & 0xff;
-//    pixels[2] = p & 0xff;
-//#define FGCOLOR RGB(0x08,0x10,0x52)
-//#define BGCOLOR RGB(0xaa,0xd5,0xc3)
+    uint16_t *pixels = (uint16_t *)current->videoBuffer + y * current->videoWidth + x * current->bpp;
     if (p&1)
     {
-        pixels[0] = 0x08;
-        pixels[1] = 0x10;
-        pixels[2] = 0x52;
+        // 8, 16, 82 (0x08, 0x10, 0x52) Foreground
+        pixels[0] = 8;
+        pixels[1] = 16;
+        pixels[2] = 82;
     }
     else
     {
-        pixels[0] = 0xaa;
-        pixels[1] = 0xd5;
-        pixels[2] = 0xc3;
+        // 170, 213, 195 (0xaa, 0xd5, 0xc3) Background
+        pixels[0] = 170;
+        pixels[1] = 213;
+        pixels[2] = 195;
     }
+}
+
+void vmputpixel(int x, int y, int p)
+{
+//    x<<=1;
+//    y<<=1;
+    putpixel(x, y, p);
+//    putpixel(x+1, y, p);
+//    putpixel(x, y+1, p);
+//    putpixel(x+1, y+1, p);
 }
 
 void redrawlcd()
@@ -237,12 +247,12 @@ void redrawlcd()
 
 void checkevents()
 {
-    
+    // do nothing, this is handled already
 }
 
 void waitforevents(struct timeval *t)
 {
-    
+    usleep(t->tv_usec);
 }
 
 void sound(int freq)
