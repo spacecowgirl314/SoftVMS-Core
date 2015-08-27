@@ -37,8 +37,12 @@
     int bpp;
     uint16_t *videoBuffer;
     char *audioStream;
+    
     int audioLength;
     int videoWidth, videoHeight;
+    
+    dispatch_semaphore_t waitToBeginFrameSemaphore;
+    
     NSString *romPath;
 }
 @end
@@ -51,17 +55,25 @@ VMUGameCore *current;
 {
     if (self = [super init])
     {
+        waitToBeginFrameSemaphore = dispatch_semaphore_create(0);
+        
         audioLength = 5512; //256*2*2*2*2; 4096
         videoWidth = 48;
         videoHeight = 32;
         bpp = 3;
         
         if(videoBuffer)
+        {
             free(videoBuffer);
+        }
         if(audioStream)
+        {
             free(audioStream);
+        }
+        
         videoBuffer = malloc(videoWidth*videoHeight*bpp);
         audioStream = malloc(audioLength);
+        
         memset(videoBuffer, 0, videoWidth*videoHeight*bpp);
         memset(audioStream, 0, audioLength);
     }
@@ -87,7 +99,7 @@ VMUGameCore *current;
 
 - (void)executeFrameSkippingFrame:(BOOL)skip
 {
-
+    dispatch_semaphore_signal(waitToBeginFrameSemaphore);
 }
 
 - (void)executeFrame
@@ -252,6 +264,7 @@ void checkevents()
 
 void waitforevents(struct timeval *t)
 {
+    dispatch_semaphore_wait(current->waitToBeginFrameSemaphore, DISPATCH_TIME_FOREVER);
     if(t != NULL)
     {
         useconds_t millis = t->tv_sec*1000 + t->tv_usec;
