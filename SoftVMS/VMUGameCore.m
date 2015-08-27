@@ -117,7 +117,7 @@ VMUGameCore *current;
 
 - (void)resetEmulation
 {
-    
+    resetcpu();
 }
 
 #pragma mark - Save State
