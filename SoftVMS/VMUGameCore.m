@@ -36,6 +36,8 @@
 {
     int bpp;
     uint16_t *videoBuffer;
+    char *audioStream;
+    int audioLength;
     int videoWidth, videoHeight;
     NSString *romPath;
 }
@@ -49,28 +51,29 @@ VMUGameCore *current;
 {
     if (self = [super init])
     {
-        videoWidth = 144;
-        videoHeight = 80;
+        audioLength = 5512; //256*2*2*2*2; 4096
+        videoWidth = 48;
+        videoHeight = 32;
         bpp = 3;
         
         if(videoBuffer)
             free(videoBuffer);
-        videoBuffer = (uint16_t*)malloc(videoWidth*videoHeight*bpp);
+        if(audioStream)
+            free(audioStream);
+        videoBuffer = malloc(videoWidth*videoHeight*bpp);
+        audioStream = malloc(audioLength);
         memset(videoBuffer, 0, videoWidth*videoHeight*bpp);
+        memset(audioStream, 0, audioLength);
     }
     
     current = self;
-    
-//    for(int i = 0; i<videoWidth*videoHeight*bpp; i++)
-//    {
-//        videoBuffer[i] = 50;
-//    }
     
     return self;
 }
 
 - (void)dealloc
 {
+    free(audioStream);
     free(videoBuffer);
 }
 
@@ -121,12 +124,12 @@ VMUGameCore *current;
 
 - (BOOL)saveStateToFileAtPath:(NSString *)fileName
 {
-    return NO;
+    return savestate([fileName UTF8String]) ? YES : NO;
 }
 
 - (BOOL)loadStateFromFileAtPath:(NSString *)fileName
 {
-    return NO;
+    return loadstate([fileName UTF8String]) ? YES : NO;
 }
 
 #pragma mark - Input
@@ -175,14 +178,14 @@ VMUGameCore *current;
 
 - (GLenum)internalPixelFormat
 {
-    return GL_RGB4;
+    return GL_RGB5;
 }
 
 #pragma mark - Audio
 
 - (double)audioSampleRate
 {
-    return 32768;
+    return 48000; //32768;
 }
 
 - (NSUInteger)audioBitDepth
@@ -213,7 +216,7 @@ void error_msg(char *fmt, ...)
 
 void putpixel(int x, int y, int p)
 {
-    uint16_t *pixels = (uint16_t *)current->videoBuffer + y * current->videoWidth + x * current->bpp;
+    uint16_t *pixels = current->videoBuffer + y * current->videoWidth + x;
     if (p&1)
     {
         // 8, 16, 82 (0x08, 0x10, 0x52) Foreground
@@ -226,18 +229,15 @@ void putpixel(int x, int y, int p)
         // 170, 213, 195 (0xaa, 0xd5, 0xc3) Background
         pixels[0] = 170;
         pixels[1] = 213;
-        pixels[2] = 195;
+        pixels[2] = 230;
     }
 }
 
 void vmputpixel(int x, int y, int p)
 {
-//    x<<=1;
-//    y<<=1;
-    putpixel(x, y, p);
-//    putpixel(x+1, y, p);
-//    putpixel(x, y+1, p);
-//    putpixel(x+1, y+1, p);
+    if (y <= 32) {
+        putpixel(x, y, p);
+    }
 }
 
 void redrawlcd()
@@ -252,20 +252,25 @@ void checkevents()
 
 void waitforevents(struct timeval *t)
 {
-    usleep(t->tv_usec);
+    if(t != NULL)
+    {
+        useconds_t millis = t->tv_sec*1000 + t->tv_usec;
+        usleep(millis);
+    }
 }
 
 void sound(int freq)
 {
-    uint8_t *stream = (uint8_t*)malloc(60);
+    char *stream = current->audioStream;
+    int length = current->audioLength;
     if(freq <= 0)
-        memset(stream, 0, 60);
+        memset(stream, 0, length);
     else
     {
         int i;
-        static short v = 0x7fff;
+        static char v = 0x7f;
         static int f = 0;
-        for(i=0; i<60; i++)
+        for(i=0; i<length; i++)
         {
             f += freq;
             while(f >= 32768)
@@ -275,7 +280,7 @@ void sound(int freq)
             }
             *stream++ = v;
         }
-        [[current ringBufferAtIndex:0] write:stream maxLength:60];
+        [[current ringBufferAtIndex:0] write:stream maxLength:sizeof(char) * length];
     }
 }
 

@@ -489,6 +489,88 @@ int pop()
     return r;
 }
 
+int savestate(const char *filename)
+{
+    FILE *fn;
+    
+    fn = fopen(filename,"wb");
+    if (fn==NULL) {
+        fprintf(stderr,"Error opening state-file %s\n",filename);
+        return(0);
+    }
+    
+    fwrite(&gamesize, sizeof(gamesize),1,fn);
+    fwrite(flashmem,0x20000,1,fn);
+    fwrite(ram,2*0x100,1,fn);
+    fwrite(sfr,0x100,1,fn);
+    fwrite(xram,3*0x80,1,fn);
+    fwrite(wram,0x200,1,fn);
+    
+    fwrite(parity, 0x100,1,fn);
+    
+    fwrite(&pc, sizeof(pc),1,fn);
+    fwrite(&lcd_updated, sizeof(lcd_updated),1,fn);
+    fwrite(&lcdon, sizeof(lcdon),1,fn);
+    fwrite(&imask, sizeof(imask),1,fn);
+    fwrite(&intreq, sizeof(intreq),1,fn);
+//    fwrite(&hasbios, sizeof(hasbios),1,fn);
+    fwrite(&spd, sizeof(spd),1,fn);
+    fwrite(&t0h, sizeof(t0h),1,fn);
+    fwrite(&t0l, sizeof(t0l),1,fn);
+    fwrite(&t0base, sizeof(t0base),1,fn);
+    fwrite(&t0scale, sizeof(t0scale),1,fn);
+    fwrite(&t1h, sizeof(t1h),1,fn);
+    fwrite(&t1l, sizeof(t1l),1,fn);
+    
+    fclose(fn);
+    return(1);
+}
+
+int loadstate(const char* filename)
+{
+    FILE *fn;
+    int savestate_gamesize;
+    
+    fn = fopen(filename,"rb");
+    if (fn==NULL) 					// no savefile yet
+    {
+        return(0);
+    }
+    
+    fread (&savestate_gamesize,sizeof(savestate_gamesize),1,fn);
+    if (savestate_gamesize!=gamesize)				// wrong cart
+    {
+        return(0);
+    }
+    
+    fread (flashmem,0x20000,1,fn);
+    fread (ram,2*0x100,1,fn);
+    fread (sfr,0x100,1,fn);
+    fread (xram,3*0x80,1,fn);
+    fread (wram,0x200,1,fn);
+    
+    fread(parity, 0x100,1,fn);
+    
+    fread(&pc, sizeof(pc),1,fn);
+    fread(&lcd_updated, sizeof(lcd_updated),1,fn);
+    fread(&lcdon, sizeof(lcdon),1,fn);
+    fread(&imask, sizeof(imask),1,fn);
+    fread(&intreq, sizeof(intreq),1,fn);
+    //    fwrite(&hasbios, sizeof(hasbios),1,fn);
+    fread(&spd, sizeof(spd),1,fn);
+    fread(&t0h, sizeof(t0h),1,fn);
+    fread(&t0l, sizeof(t0l),1,fn);
+    fread(&t0base, sizeof(t0base),1,fn);
+    fread(&t0scale, sizeof(t0scale),1,fn);
+    fread(&t1h, sizeof(t1h),1,fn);
+    fread(&t1l, sizeof(t1l),1,fn);
+    
+    lcdrefresh();
+    fclose(fn);
+    
+    return(1);
+}
+
 void resetcpu()
 {
     int i;
@@ -701,7 +783,7 @@ void run_cpu()
                     case 5:
                         cy = 2; /* ? */
                         writemem(0x100, flashmem[0x1ffff&(readmem(0x104)+(readmem(0x105)<<8)+
-                                                       (readmem(0x154)<<16))]);
+                                                          (readmem(0x154)<<16))]);
                         break;
                     case 6:
                         cy = 2;
@@ -810,7 +892,7 @@ void run_cpu()
                         cy = 2; /* ? */
                         if(!(readmem(0x154)&2))
                             flashmem[0x1ffff&(readmem(0x104)+(readmem(0x105)<<8)+
-                                           (readmem(0x154)<<16))] = readmem(0x100);
+                                              (readmem(0x154)<<16))] = readmem(0x100);
                         break;
                     case 6:
                         cy = 2;

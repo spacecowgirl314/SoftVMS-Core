@@ -6,6 +6,8 @@ extern void keypress(int i);
 extern void keyrelease(int i);
 extern int do_vmsgame(char *filename, char *biosname);
 extern int do_lcdimg(char *filename);
+extern int savestate(const char *filename);
+extern int loadstate(const char *filename);
 extern void sound(int freq);
 #ifdef BSD_STYLE_GETTIMEOFDAY
 #ifdef TIMEZONE_IS_VOID
