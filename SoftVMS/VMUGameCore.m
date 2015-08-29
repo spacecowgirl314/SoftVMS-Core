@@ -190,7 +190,7 @@ VMUGameCore *current;
 
 - (GLenum)internalPixelFormat
 {
-    return GL_RGB5;
+    return GL_RGB8;
 }
 
 #pragma mark - Audio
@@ -241,13 +241,14 @@ void putpixel(int x, int y, int p)
         // 170, 213, 195 (0xaa, 0xd5, 0xc3) Background
         pixels[0] = 170;
         pixels[1] = 213;
-        pixels[2] = 230;
+        pixels[2] = 195;
     }
 }
 
 void vmputpixel(int x, int y, int p)
 {
-    if (y <= 32) {
+    if (y <= 32)
+    {
         putpixel(x, y, p);
     }
 }
@@ -265,11 +266,12 @@ void checkevents()
 void waitforevents(struct timeval *t)
 {
     dispatch_semaphore_wait(current->waitToBeginFrameSemaphore, DISPATCH_TIME_FOREVER);
-    if(t != NULL)
-    {
-        useconds_t millis = t->tv_sec*1000 + t->tv_usec;
-        usleep(millis);
-    }
+//    If we weren't using a semaphore we'd be using this but then the framerate would be meaningless.
+//    if(t != NULL)
+//    {
+//        useconds_t millis = t->tv_sec*1000 + t->tv_usec;
+//        usleep(millis);
+//    }
 }
 
 void sound(int freq)
@@ -277,7 +279,9 @@ void sound(int freq)
     char *stream = current->audioStream;
     int length = current->audioLength;
     if(freq <= 0)
+    {
         memset(stream, 0, length);
+    }
     else
     {
         int i;
