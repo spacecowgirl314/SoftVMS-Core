@@ -29,5 +29,5 @@
 #import "OEVMUSystemResponderClient.h"
 
 OE_EXPORTED_CLASS
-@interface VMUGameCore : OEGameCore
+@interface SoftVMSGameCore : OEGameCore
 @end

@@ -26,17 +26,18 @@
 
 // We need to mess with core internals
 
-#import "VMUGameCore.h"
+#import "SoftVMSGameCore.h"
 
 #import <OpenEmuBase/OERingBuffer.h>
 #import <OpenGL/gl.h>
 #import "prototypes.h"
 
-@interface VMUGameCore () <OEVMUSystemResponderClient>
+@interface SoftVMSGameCore () <OEVMUSystemResponderClient>
 {
     int bpp;
-    uint16_t *videoBuffer;
+    uint32_t *videoBuffer;
     char *audioStream;
+    BOOL running;
     
     int audioLength;
     int videoWidth, videoHeight;
@@ -47,9 +48,9 @@
 }
 @end
 
-VMUGameCore *current;
+SoftVMSGameCore *current;
 
-@implementation VMUGameCore
+@implementation SoftVMSGameCore
 
 - (id)init
 {
@@ -57,10 +58,10 @@ VMUGameCore *current;
     {
         waitToBeginFrameSemaphore = dispatch_semaphore_create(0);
         
-        audioLength = 5512; //256*2*2*2*2; 4096
+        audioLength = 1024;
         videoWidth = 48;
         videoHeight = 32;
-        bpp = 3;
+        bpp = 4;
         
         if(videoBuffer)
         {
@@ -100,6 +101,7 @@ VMUGameCore *current;
 - (void)executeFrameSkippingFrame:(BOOL)skip
 {
     dispatch_semaphore_signal(waitToBeginFrameSemaphore);
+    current->running = true;
 }
 
 - (void)executeFrame
@@ -115,6 +117,11 @@ VMUGameCore *current;
         [self.renderDelegate willRenderOnAlternateThread];
         [NSThread detachNewThreadSelector:@selector(runVMUEmuThread) toTarget:self withObject:nil];
     }
+}
+
+- (void)stopEmulation
+{
+    [super stopEmulation];
 }
 
 - (void)runVMUEmuThread
@@ -185,7 +192,7 @@ VMUGameCore *current;
 
 - (GLenum)pixelType
 {
-    return GL_UNSIGNED_SHORT_4_4_4_4_REV;
+    return GL_UNSIGNED_INT_8_8_8_8_REV;
 }
 
 - (GLenum)internalPixelFormat
@@ -197,7 +204,7 @@ VMUGameCore *current;
 
 - (double)audioSampleRate
 {
-    return 48000; //32768;
+    return 65536; // 32768; // 65536;
 }
 
 - (NSUInteger)audioBitDepth
@@ -207,7 +214,7 @@ VMUGameCore *current;
 
 - (NSTimeInterval)frameInterval
 {
-    return 50;
+    return 60;
 }
 
 - (NSUInteger)channelCount
@@ -228,20 +235,16 @@ void error_msg(char *fmt, ...)
 
 void putpixel(int x, int y, int p)
 {
-    uint16_t *pixels = current->videoBuffer + y * current->videoWidth + x;
+    uint32_t *pixels = current->videoBuffer + y * current->videoWidth + x;
     if (p&1)
     {
         // 8, 16, 82 (0x08, 0x10, 0x52) Foreground
-        pixels[0] = 8;
-        pixels[1] = 16;
-        pixels[2] = 82;
+        pixels[0] = 0x00081052;
     }
     else
     {
         // 170, 213, 195 (0xaa, 0xd5, 0xc3) Background
-        pixels[0] = 170;
-        pixels[1] = 213;
-        pixels[2] = 195;
+        pixels[0] = 0x00aad5c3;
     }
 }
 
@@ -265,40 +268,37 @@ void checkevents()
 
 void waitforevents(struct timeval *t)
 {
-    dispatch_semaphore_wait(current->waitToBeginFrameSemaphore, DISPATCH_TIME_FOREVER);
-//    If we weren't using a semaphore we'd be using this but then the framerate would be meaningless.
-//    if(t != NULL)
+//    dispatch_semaphore_wait(current->waitToBeginFrameSemaphore, DISPATCH_TIME_FOREVER);
+//    while(!current->running)
 //    {
-//        useconds_t millis = t->tv_sec*1000 + t->tv_usec;
-//        usleep(millis);
+//        
 //    }
+    if(t != NULL)
+    {
+        useconds_t millis = t->tv_sec*1000 + t->tv_usec;
+        usleep(millis);
+    }
+//    current->running = false;
 }
 
 void sound(int freq)
 {
-    char *stream = current->audioStream;
-    int length = current->audioLength;
     if(freq <= 0)
-    {
-        memset(stream, 0, length);
-    }
-    else
-    {
+        memset(current->audioStream, 0, current->audioLength);
+    else {
         int i;
         static char v = 0x7f;
         static int f = 0;
-        for(i=0; i<length; i++)
-        {
+        for(i=0; i<current->audioLength; i++) {
             f += freq;
-            while(f >= 32768)
-            {
-                v ^= 0xffff;
+            while(f >= 32768) {
+                v ^= 0xff;
                 f -= 32768;
             }
-            *stream++ = v;
+            current->audioStream[i] = v;
         }
-        [[current ringBufferAtIndex:0] write:stream maxLength:sizeof(char) * length];
     }
+    [[current ringBufferAtIndex:0] write:current->audioStream maxLength:current->audioLength];
 }
 
 @end

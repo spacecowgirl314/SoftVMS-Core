@@ -25,7 +25,7 @@
 	<key>NSPrincipalClass</key>
 	<string>OEGameCoreController</string>
 	<key>OEGameCoreClass</key>
-	<string>VMUGameCore</string>
+	<string>SoftVMSGameCore</string>
 	<key>OEGameCorePlayerCount</key>
 	<string>1</string>
 	<key>OEProjectURL</key>

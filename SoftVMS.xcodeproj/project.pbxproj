@@ -27,7 +27,7 @@
 		98150A8416D412E90085EBA2 /* OpenEmuBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98150A8316D412E90085EBA2 /* OpenEmuBase.framework */; };
 		986F323716D3FF4F00BB38E2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 986F323616D3FF4F00BB38E2 /* Cocoa.framework */; };
 		986F324116D3FF4F00BB38E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 986F323F16D3FF4F00BB38E2 /* InfoPlist.strings */; };
-		986F325116D4014B00BB38E2 /* VMUGameCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 986F325016D4014B00BB38E2 /* VMUGameCore.m */; };
+		986F325116D4014B00BB38E2 /* SoftVMSGameCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 986F325016D4014B00BB38E2 /* SoftVMSGameCore.m */; };
 		986F326F16D4096500BB38E2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 986F326E16D4096500BB38E2 /* OpenGL.framework */; };
 /* End PBXBuildFile section */
 
@@ -45,7 +45,7 @@
 		082CA5CF1B8BAB510054B53C /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cpu.c; path = vms/cpu.c; sourceTree = "<group>"; };
 		082CA5D11B8BAB6D0054B53C /* lcdimg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lcdimg.c; path = vms/lcdimg.c; sourceTree = "<group>"; };
 		082CA5D31B8BAB770054B53C /* prototypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = prototypes.h; path = vms/prototypes.h; sourceTree = "<group>"; };
-		084287181B8BA29700726E4D /* OEVMUSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OEVMUSystemResponderClient.h; path = ../../../Projects/repos/OpenEmu/OpenEmu/VMU/OEVMUSystemResponderClient.h; sourceTree = "<group>"; };
+		0838AC021B9D4C9000FA708A /* OEVMUSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OEVMUSystemResponderClient.h; path = ../../OpenEmu/VMU/OEVMUSystemResponderClient.h; sourceTree = "<group>"; };
 		98150A8316D412E90085EBA2 /* OpenEmuBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenEmuBase.framework; path = "../../../../Library/Developer/Xcode/DerivedData/OpenEmu-bhfveylavlxwbkddelpdvazebykd/Build/Products/Debug/OpenEmuBase.framework"; sourceTree = "<group>"; };
 		986F323316D3FF4F00BB38E2 /* SoftVMS.oecoreplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SoftVMS.oecoreplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		986F323616D3FF4F00BB38E2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -55,8 +55,8 @@
 		986F323E16D3FF4F00BB38E2 /* SoftVMS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SoftVMS-Info.plist"; sourceTree = "<group>"; };
 		986F324016D3FF4F00BB38E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		986F324216D3FF4F00BB38E2 /* SoftVMS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SoftVMS-Prefix.pch"; sourceTree = "<group>"; };
-		986F324F16D4014B00BB38E2 /* VMUGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VMUGameCore.h; sourceTree = "<group>"; };
-		986F325016D4014B00BB38E2 /* VMUGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VMUGameCore.m; sourceTree = "<group>"; };
+		986F324F16D4014B00BB38E2 /* SoftVMSGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoftVMSGameCore.h; sourceTree = "<group>"; };
+		986F325016D4014B00BB38E2 /* SoftVMSGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoftVMSGameCore.m; sourceTree = "<group>"; };
 		986F326E16D4096500BB38E2 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -115,9 +115,9 @@
 		986F323C16D3FF4F00BB38E2 /* SoftVMS */ = {
 			isa = PBXGroup;
 			children = (
-				084287181B8BA29700726E4D /* OEVMUSystemResponderClient.h */,
-				986F324F16D4014B00BB38E2 /* VMUGameCore.h */,
-				986F325016D4014B00BB38E2 /* VMUGameCore.m */,
+				0838AC021B9D4C9000FA708A /* OEVMUSystemResponderClient.h */,
+				986F324F16D4014B00BB38E2 /* SoftVMSGameCore.h */,
+				986F325016D4014B00BB38E2 /* SoftVMSGameCore.m */,
 				986F327016D40A6300BB38E2 /* vms */,
 				986F323D16D3FF4F00BB38E2 /* Supporting Files */,
 			);
@@ -224,7 +224,7 @@
 			files = (
 				082CA5E01B8BDDCA0054B53C /* cpu.c in Sources */,
 				082CA5D21B8BAB6D0054B53C /* lcdimg.c in Sources */,
-				986F325116D4014B00BB38E2 /* VMUGameCore.m in Sources */,
+				986F325116D4014B00BB38E2 /* SoftVMSGameCore.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
